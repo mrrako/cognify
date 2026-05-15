@@ -84,3 +84,40 @@ export async function generateFlashcards(text: string) {
     return [];
   }
 }
+
+export async function generateQuiz(text: string, difficulty: "easy" | "medium" | "hard" = "medium") {
+  if (!text || text.length < 10) return [];
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert examiner. Create a multiple-choice quiz from the provided educational text.
+          Difficulty Level: ${difficulty}
+          
+          Requirements:
+          - Create 5 high-quality questions.
+          - Each question must have exactly 4 options.
+          - Identify the correct answer clearly.
+          - Provide a brief explanation for the correct answer.
+          
+          Return ONLY a JSON object with a key "quiz" containing an array of objects.
+          Each object must have: "question", "options" (array of 4 strings), "correctAnswer" (exact string from options), and "explanation".`
+        },
+        {
+          role: "user",
+          content: text
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    const parsed = JSON.parse(response.choices[0].message.content || "{\"quiz\": []}");
+    return parsed.quiz;
+  } catch (error: any) {
+    console.error("Quiz AI Error:", error);
+    return [];
+  }
+}
