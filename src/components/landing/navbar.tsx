@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Github } from "lucide-react";
+import { BookOpen, Code } from "lucide-react";
 import { motion } from "framer-motion";
 
 import AuthButton from "@/components/auth/auth-button";
@@ -31,7 +31,7 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" className="hidden sm:flex" asChild>
             <Link href="https://github.com">
-              <Github className="w-4 h-4 mr-2" />
+              <Code className="w-4 h-4 mr-2" />
               GitHub
             </Link>
           </Button>

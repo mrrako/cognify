@@ -14,6 +14,12 @@ export const metadata: Metadata = {
 
 import { AuthProvider } from "@/context/auth-context";
 
+import { Toaster } from "@/components/ui/sonner";
+
+import { PageTransition } from "@/components/layout/page-transition";
+
+import { ErrorBoundary } from "@/components/error-boundary";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,9 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark scroll-smooth">
       <body className={`${inter.variable} font-sans antialiased bg-background text-foreground`}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <PageTransition>
+              {children}
+            </PageTransition>
+          </AuthProvider>
+        </ErrorBoundary>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

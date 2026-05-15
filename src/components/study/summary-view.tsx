@@ -1,41 +1,59 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { Sparkles, FileText, Download } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Button } from "@/components/ui/button";
 
-export function SummaryView() {
+interface SummaryViewProps {
+  content?: string;
+}
+
+export function SummaryView({ content = "" }: SummaryViewProps) {
+  if (!content) {
+    return (
+      <Card className="bg-black/40 border-white/5 border-dashed border-2 py-12">
+        <CardContent className="flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+            <Sparkles className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">No summary yet</h3>
+          <p className="text-muted-foreground text-sm max-w-xs">
+            The AI is still processing this document. Check back in a few seconds.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <Card className="bg-black/40 border-white/5">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            AI Summary
+      <div className="flex justify-between items-center px-1">
+        <div className="flex items-center gap-2 text-primary font-bold tracking-widest uppercase text-xs">
+          <Sparkles className="w-4 h-4" />
+          AI Generated Insight
+        </div>
+        <Button variant="outline" size="sm" className="rounded-full bg-white/5 border-white/10 hover:bg-white/10">
+          <Download className="w-4 h-4 mr-2" />
+          Export PDF
+        </Button>
+      </div>
+
+      <Card className="bg-black/40 border-white/5 shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-1 h-full bg-primary/50 group-hover:bg-primary transition-colors" />
+        <CardHeader className="pb-2">
+          <CardTitle className="text-2xl font-bold flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <FileText className="w-6 h-6 text-primary" />
+            </div>
+            Comprehensive Summary
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-muted-foreground leading-relaxed">
-          <p>
-            This lecture covers the fundamental principles of cellular biology, specifically focusing on the structure and function of eukaryotic cells. The key difference between prokaryotic and eukaryotic cells is the presence of a membrane-bound nucleus and organelles.
-          </p>
-          <div className="space-y-2">
-            <h4 className="font-semibold text-foreground">Key Takeaways:</h4>
-            <ul className="space-y-2">
-              {[
-                "The Nucleus acts as the control center, containing DNA.",
-                "Mitochondria are the powerhouses, generating ATP through cellular respiration.",
-                "The Endoplasmic Reticulum (ER) is involved in protein and lipid synthesis.",
-                "Golgi apparatus modifies, sorts, and packages proteins for secretion."
-              ].map((point, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary mt-1 shrink-0" />
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <p>
-            Understanding these components is essential for grasping more complex biological processes such as metabolism, cell signaling, and reproduction.
-          </p>
+        <CardContent className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-primary prose-li:text-muted-foreground pt-4 leading-relaxed">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {content}
+          </ReactMarkdown>
         </CardContent>
       </Card>
     </div>

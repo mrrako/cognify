@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import pdf from "pdf-parse";
+import { PDFParse as pdf } from "pdf-parse";
 import { revalidatePath } from "next/cache";
 import { generateSummary, generateFlashcards, generateQuiz, chunkText, generateEmbedding } from "./ai-actions";
 
@@ -19,8 +19,10 @@ export async function uploadPDF(formData: FormData) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const pdfData = await pdf(buffer);
+    const parser = new pdf({ data: buffer });
+    const pdfData = await parser.getText();
     const text = pdfData.text;
+    await parser.destroy();
 
     // 1. Generate AI Content
     const [aiSummary, aiFlashcards, aiQuiz] = await Promise.all([
@@ -45,7 +47,7 @@ export async function uploadPDF(formData: FormData) {
     if (noteError) throw noteError;
 
     // 3. Process Vector Search (Chunking & Embeddings)
-    const chunks = chunkText(text);
+    const chunks = await chunkText(text);
     
     // Process chunks in batches for efficiency
     const sectionPromises = chunks.map(async (chunk) => {

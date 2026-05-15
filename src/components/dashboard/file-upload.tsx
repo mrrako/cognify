@@ -8,15 +8,24 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { uploadPDF } from "@/app/dashboard/actions";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+import { toast } from "sonner";
 
 export function FileUpload() {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [status, setStatus] = useState<"idle" | "uploading" | "extracting" | "success">("idle");
   const [progress, setProgress] = useState(0);
   const [file, setFile] = useState<File | null>(null);
   const router = useRouter();
 
   const handleUpload = async (selectedFile: File) => {
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
     setFile(selectedFile);
     setIsUploading(true);
     setStatus("uploading");
@@ -24,13 +33,13 @@ export function FileUpload() {
     // Simulate upload progress
     let p = 0;
     const interval = setInterval(() => {
-      p += 10;
-      if (p <= 90) setProgress(p);
-      if (p === 90) {
+      p += 5;
+      if (p <= 80) setProgress(p);
+      if (p === 80) {
         clearInterval(interval);
         setStatus("extracting");
       }
-    }, 200);
+    }, 150);
 
     try {
       const formData = new FormData();
@@ -42,32 +51,56 @@ export function FileUpload() {
         setProgress(100);
         setStatus("success");
         setIsUploading(false);
+        toast.success("Study material processed successfully!");
       }
     } catch (error: any) {
-      alert("Error uploading: " + error.message);
+      toast.error(error.message || "Failed to process PDF");
       setIsUploading(false);
       setStatus("idle");
       setFile(null);
+      setProgress(0);
+    } finally {
+      clearInterval(interval);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDragging(false);
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile && droppedFile.type === "application/pdf") {
       handleUpload(droppedFile);
+    } else {
+      toast.error("Please upload a PDF file");
     }
   };
 
   return (
     <div className="w-full">
       <div
-        onDragOver={(e) => e.preventDefault()}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className="relative group cursor-pointer"
       >
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-        <div className="relative p-12 rounded-2xl border-2 border-dashed border-white/10 bg-black/40 hover:border-primary/50 transition-all flex flex-col items-center justify-center text-center">
+        <div className={cn(
+          "absolute -inset-1 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-2xl blur transition duration-1000",
+          isDragging ? "opacity-100 scale-[1.02]" : "opacity-25 group-hover:opacity-50"
+        )}></div>
+        <div className={cn(
+          "relative p-12 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center text-center",
+          isDragging ? "border-primary bg-primary/5 scale-[0.99]" : "border-white/10 bg-black/40 hover:border-primary/50"
+        )}>
           <AnimatePresence mode="wait">
             {status === "idle" ? (
               <motion.div

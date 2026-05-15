@@ -114,6 +114,7 @@ export async function generateQuiz(text: string, difficulty: "easy" | "medium" |
       response_format: { type: "json_object" }
     });
 
+    const parsed = JSON.parse(response.choices[0].message.content || "{\"quiz\": []}");
     return parsed.quiz;
   } catch (error: any) {
     console.error("Quiz AI Error:", error);
@@ -134,7 +135,7 @@ export async function generateEmbedding(text: string) {
   }
 }
 
-export function chunkText(text: string, size: number = 1000): string[] {
+export async function chunkText(text: string, size: number = 1000): Promise<string[]> {
   const chunks: string[] = [];
   let index = 0;
   while (index < text.length) {

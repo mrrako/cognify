@@ -1,14 +1,10 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, ArrowUpRight } from "lucide-react";
+import { GraduationCap, ArrowUpRight, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-const quizHistory = [
-  { id: 1, title: "Cell Biology Quiz", score: "9/10", date: "May 12, 2026", status: "Perfect" },
-  { id: 2, title: "Economic Principles", score: "7/10", date: "May 10, 2026", status: "Good" },
-  { id: 3, title: "Organic Chem Basics", score: "5/10", date: "May 08, 2026", status: "Average" },
-];
+const quizHistory: any[] = [];
 
 export function QuizHistory() {
   return (
@@ -21,21 +17,30 @@ export function QuizHistory() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {quizHistory.map((quiz) => (
-            <div key={quiz.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer border border-transparent hover:border-white/10">
-              <div className="flex flex-col">
-                <span className="font-medium">{quiz.title}</span>
-                <span className="text-xs text-muted-foreground">{quiz.date}</span>
+          {quizHistory.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                <History className="w-5 h-5 text-muted-foreground" />
               </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right mr-2">
-                  <p className="text-sm font-bold text-primary">{quiz.score}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">{quiz.status}</p>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-              </div>
+              <p className="text-xs text-muted-foreground">No recent quizzes</p>
             </div>
-          ))}
+          ) : (
+            quizHistory.map((quiz) => (
+              <div key={quiz.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer border border-transparent hover:border-white/10">
+                <div className="flex flex-col">
+                  <span className="font-medium">{quiz.title}</span>
+                  <span className="text-xs text-muted-foreground">{quiz.date}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right mr-2">
+                    <p className="text-sm font-bold text-primary">{quiz.score}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">{quiz.status}</p>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </CardContent>
     </Card>
