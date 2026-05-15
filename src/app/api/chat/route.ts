@@ -1,9 +1,8 @@
-import { getOpenAI } from "@/lib/openai";
+import { geminiProModel } from "@/lib/gemini";
 import { createClient } from "@/utils/supabase/server";
 import { generateEmbedding } from "@/app/dashboard/ai-actions";
 
 export async function POST(req: Request) {
-  const openai = getOpenAI();
   try {
     const { messages, noteId } = await req.json();
     const supabase = await createClient();
@@ -27,30 +26,32 @@ export async function POST(req: Request) {
     // 4. Combine chunks into context
     const context = chunks?.map((c: any) => c.content).join("\n\n---\n\n") || "No relevant context found in notes.";
 
-    // 5. Stream from OpenAI
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      stream: true,
-      messages: [
-        {
-          role: "system",
-          content: `You are Cognify AI, a helpful study assistant. 
-          Use the following SEMANTICALLY RELEVANT EXCERPTS from the student's notes to answer their question. 
-          If the answer is not in the excerpts, use your general knowledge but clarify it wasn't found in the specific notes provided.
-          Keep answers concise and helpful.
-          
-          NOTES CONTEXT:
-          ${context}`
-        },
-        ...messages,
-      ],
+    // 5. Stream from Gemini
+    const formattedHistory = messages.slice(0, -1).map((m: any) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }]
+    }));
+
+    const prompt = `System Instruction: You are Cognify AI, a helpful study assistant. 
+Use the following SEMANTICALLY RELEVANT EXCERPTS from the student's notes to answer their question. 
+If the answer is not in the excerpts, use your general knowledge but clarify it wasn't found in the specific notes provided.
+Keep answers concise and helpful.
+
+NOTES CONTEXT:
+${context}
+
+User Question: ${lastMessage}`;
+
+    const chat = geminiProModel.startChat({
+      history: formattedHistory
     });
+
+    const result = await chat.sendMessageStream(prompt);
 
     const stream = new ReadableStream({
       async start(controller) {
-        for await (const chunk of response) {
-          const content = chunk.choices[0]?.delta?.content || "";
-          controller.enqueue(new TextEncoder().encode(content));
+        for await (const chunk of result.stream) {
+          controller.enqueue(new TextEncoder().encode(chunk.text()));
         }
         controller.close();
       },
