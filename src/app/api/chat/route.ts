@@ -1,12 +1,9 @@
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/openai";
 import { createClient } from "@/utils/supabase/server";
 import { generateEmbedding } from "@/app/dashboard/ai-actions";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(req: Request) {
+  const openai = getOpenAI();
   try {
     const { messages, noteId } = await req.json();
     const supabase = await createClient();

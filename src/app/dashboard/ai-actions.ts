@@ -1,10 +1,6 @@
 "use server";
 
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { getOpenAI } from "@/lib/openai";
 
 export async function generateSummary(text: string) {
   if (!text || text.length < 10) {
@@ -12,6 +8,7 @@ export async function generateSummary(text: string) {
   }
 
   try {
+    const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // or gpt-3.5-turbo
       messages: [
@@ -53,6 +50,7 @@ export async function generateFlashcards(text: string) {
   if (!text || text.length < 10) return [];
 
   try {
+    const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -89,6 +87,7 @@ export async function generateQuiz(text: string, difficulty: "easy" | "medium" |
   if (!text || text.length < 10) return [];
 
   try {
+    const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -124,6 +123,7 @@ export async function generateQuiz(text: string, difficulty: "easy" | "medium" |
 
 export async function generateEmbedding(text: string) {
   try {
+    const openai = getOpenAI();
     const response = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: text.replace(/\n/g, " "),
