@@ -67,6 +67,7 @@ export default function LoginPage() {
                   type="email" 
                   placeholder="name@example.com" 
                   required 
+                  autoComplete="email"
                   className="bg-white/5 border-white/10"
                 />
               </div>
@@ -76,6 +77,7 @@ export default function LoginPage() {
                   type="password" 
                   placeholder="••••••••" 
                   required 
+                  autoComplete="current-password"
                   className="bg-white/5 border-white/10"
                 />
               </div>

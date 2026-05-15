@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { PDFParse as pdf } from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 import { revalidatePath } from "next/cache";
 import { generateSummary, generateFlashcards, generateQuiz, chunkText, generateEmbedding } from "./ai-actions";
 
@@ -19,7 +19,8 @@ export async function uploadPDF(formData: FormData) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const parser = new pdf({ data: buffer });
+    // Using the modern PDFParse class
+    const parser = new PDFParse({ data: buffer });
     const pdfData = await parser.getText();
     const text = pdfData.text;
     await parser.destroy();
