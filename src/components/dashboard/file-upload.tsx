@@ -53,6 +53,8 @@ export function FileUpload() {
         setStatus("success");
         setIsUploading(false);
         toast.success("Study material processed successfully!");
+      } else {
+        throw new Error(result.error);
       }
     } catch (error: any) {
       toast.error(error.message || "Failed to process PDF");

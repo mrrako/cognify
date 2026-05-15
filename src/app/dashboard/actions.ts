@@ -73,6 +73,6 @@ export async function uploadPDF(formData: FormData) {
     return { success: true, id: note.id };
   } catch (error: any) {
     console.error("Upload error:", error);
-    throw new Error(error.message);
+    return { success: false, error: error.message || "Failed to process PDF" };
   }
 }
