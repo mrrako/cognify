@@ -50,15 +50,24 @@ export async function generateSummary(text: string) {
 }
 
 export async function generateFlashcards(text: string) {
+  if (!text || text.length < 10) return [];
+
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: `Generate 5-8 high-quality flashcards for the provided educational text.
-          Return the result as a JSON array of objects with 'question' and 'answer' keys.
-          Focus on facts, definitions, and concepts likely to appear in an exam.`
+          content: `You are an educational content creator. Create study flashcards from the provided text.
+          Focus on:
+          - Definitions of key terms
+          - Important dates or numbers
+          - Core concepts and their roles
+          - Cause and effect relationships
+          
+          Return ONLY a JSON object with a key "flashcards" containing an array of objects.
+          Each object must have exactly two keys: "question" and "answer".
+          Keep questions and answers concise (under 20 words each) for better memorization.`
         },
         {
           role: "user",
@@ -68,8 +77,8 @@ export async function generateFlashcards(text: string) {
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
-    return result.flashcards || [];
+    const parsed = JSON.parse(response.choices[0].message.content || "{\"flashcards\": []}");
+    return parsed.flashcards;
   } catch (error: any) {
     console.error("Flashcard AI Error:", error);
     return [];

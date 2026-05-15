@@ -4,7 +4,7 @@ import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { cookies } from "next/headers";
 import pdf from "pdf-parse";
 import { revalidatePath } from "next/cache";
-import { generateSummary } from "./ai-actions";
+import { generateSummary, generateFlashcards } from "./ai-actions";
 
 export async function uploadPDF(formData: FormData) {
   const file = formData.get("file") as File;
@@ -26,14 +26,18 @@ export async function uploadPDF(formData: FormData) {
     const pdfData = await pdf(buffer);
     const text = pdfData.text;
 
-    // 3. Generate AI Summary Automatically
-    const aiSummary = await generateSummary(text);
+    // 3. Generate AI Content Automatically
+    const [aiSummary, aiFlashcards] = await Promise.all([
+      generateSummary(text),
+      generateFlashcards(text)
+    ]);
 
     // 4. Store in Firestore
     const noteRef = await adminDb.collection("users").doc(userId).collection("notes").add({
       title: file.name,
       content: text,
       summary: aiSummary,
+      flashcards: aiFlashcards,
       pageCount: pdfData.numpages,
       createdAt: new Date(),
     });
