@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Upload, File, X, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -18,6 +18,7 @@ export function FileUpload() {
   const [status, setStatus] = useState<"idle" | "uploading" | "extracting" | "success">("idle");
   const [progress, setProgress] = useState(0);
   const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const handleUpload = async (selectedFile: File) => {
@@ -117,17 +118,28 @@ export function FileUpload() {
                 <p className="text-muted-foreground mb-6 max-w-xs text-sm">
                   Drag and drop your PDF lecture notes here. We'll automatically summarize them for you.
                 </p>
-                <label className="cursor-pointer">
-                  <Button variant="secondary" className="rounded-full px-8 pointer-events-none">
+                <div>
+                  <Button 
+                    variant="secondary" 
+                    className="rounded-full px-8"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
                     Select File
                   </Button>
                   <input
+                    ref={fileInputRef}
                     type="file"
                     className="hidden"
                     accept=".pdf"
-                    onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        handleUpload(e.target.files[0]);
+                        // Reset value so same file can be selected again if needed
+                        e.target.value = '';
+                      }
+                    }}
                   />
-                </label>
+                </div>
               </motion.div>
             ) : status === "uploading" || status === "extracting" ? (
               <motion.div
