@@ -114,10 +114,32 @@ export async function generateQuiz(text: string, difficulty: "easy" | "medium" |
       response_format: { type: "json_object" }
     });
 
-    const parsed = JSON.parse(response.choices[0].message.content || "{\"quiz\": []}");
     return parsed.quiz;
   } catch (error: any) {
     console.error("Quiz AI Error:", error);
     return [];
   }
+}
+
+export async function generateEmbedding(text: string) {
+  try {
+    const response = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text.replace(/\n/g, " "),
+    });
+    return response.data[0].embedding;
+  } catch (error) {
+    console.error("Embedding Error:", error);
+    throw error;
+  }
+}
+
+export function chunkText(text: string, size: number = 1000): string[] {
+  const chunks: string[] = [];
+  let index = 0;
+  while (index < text.length) {
+    chunks.push(text.slice(index, index + size));
+    index += size - 100; // 100 char overlap
+  }
+  return chunks;
 }

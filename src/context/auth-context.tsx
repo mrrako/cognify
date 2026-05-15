@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/lib/firebase/config";
+import { User } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/client";
 
 interface AuthContextType {
   user: User | null;
@@ -17,24 +17,18 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-      
-      // Handle cookie for server-side auth (simplified)
-      if (user) {
-        user.getIdToken().then(token => {
-          document.cookie = `session=${token}; path=/; samesite=strict; max-age=3600`;
-        });
-      } else {
-        document.cookie = "session=; path=/; samesite=strict; max-age=0";
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
       }
-    });
+    );
 
-    return () => unsubscribe();
-  }, []);
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
