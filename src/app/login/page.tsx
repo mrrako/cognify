@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { login, signup } from "./actions";
+import { loginWithEmail, signupWithEmail } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -50,8 +50,8 @@ export default function LoginPage() {
           <CardContent>
             <form action={async (formData) => {
               setIsPending(true);
-              if (mode === "login") await login(formData);
-              else await signup(formData);
+              if (mode === "login") await loginWithEmail(formData);
+              else await signupWithEmail(formData);
               setIsPending(false);
             }} className="space-y-4">
               {error && (

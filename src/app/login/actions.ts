@@ -1,48 +1,37 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut as firebaseSignOut 
+} from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
 
-export async function login(formData: FormData) {
-  const supabase = await createClient();
+export async function loginWithEmail(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
-
-  const { error } = await supabase.auth.signInWithPassword(data);
-
-  if (error) {
-    redirect("/login?error=" + encodeURIComponent(error.message));
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    window.location.href = "/dashboard";
+  } catch (error: any) {
+    window.location.href = `/login?error=${encodeURIComponent(error.message)}`;
   }
-
-  revalidatePath("/", "layout");
-  redirect("/dashboard");
 }
 
-export async function signup(formData: FormData) {
-  const supabase = await createClient();
+export async function signupWithEmail(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
-
-  const { error } = await supabase.auth.signUp(data);
-
-  if (error) {
-    redirect("/login?error=" + encodeURIComponent(error.message));
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    window.location.href = "/dashboard";
+  } catch (error: any) {
+    window.location.href = `/login?error=${encodeURIComponent(error.message)}`;
   }
-
-  revalidatePath("/", "layout");
-  redirect("/dashboard");
 }
 
 export async function logout() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  revalidatePath("/", "layout");
-  redirect("/");
+  await firebaseSignOut(auth);
+  window.location.href = "/";
 }

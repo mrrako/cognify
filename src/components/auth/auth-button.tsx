@@ -1,13 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/utils/supabase/server";
+import { useAuth } from "@/context/auth-context";
 
-export default async function AuthButton() {
-  const supabase = await createClient();
+export default function AuthButton() {
+  const { user, loading } = useAuth();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (loading) return <div className="w-20 h-8 bg-white/5 animate-pulse rounded-full" />;
 
   return user ? (
     <div className="flex items-center gap-4">

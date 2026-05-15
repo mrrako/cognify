@@ -1,22 +1,34 @@
+"use client";
+
 import { DashboardHeader } from "@/components/dashboard/header";
 import { FileUpload } from "@/components/dashboard/file-upload";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Clock, ChevronRight } from "lucide-react";
+import { FileText, Clock, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default async function Dashboard() {
-  const supabase = await createClient();
+export default function Dashboard() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
-  if (!user) {
-    return redirect("/login");
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
   }
+
+  if (!user) return null;
 
   const recentNotes = [
     { id: "1", title: "Introduction to Biology", date: "2 hours ago", pages: 12 },
@@ -26,7 +38,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background dark">
-      <DashboardHeader email={user.email} />
+      <DashboardHeader email={user.email || ""} />
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto space-y-12">
