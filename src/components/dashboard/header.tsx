@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, User, Bell } from "lucide-react";
+import { BookOpen, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserMenu } from "./user-menu";
 
-export function DashboardHeader() {
+export function DashboardHeader({ email }: { email?: string }) {
   return (
     <header className="h-16 border-b border-white/5 bg-black/40 backdrop-blur-md sticky top-0 z-40">
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
@@ -19,9 +20,7 @@ export function DashboardHeader() {
           <Button variant="ghost" size="icon" className="text-muted-foreground">
             <Bell className="w-5 h-5" />
           </Button>
-          <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs">
-            JD
-          </div>
+          <UserMenu email={email} />
         </div>
       </div>
     </header>

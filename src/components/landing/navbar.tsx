@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Github } from "lucide-react";
 import { motion } from "framer-motion";
 
+import AuthButton from "@/components/auth/auth-button";
+
 export function Navbar() {
   return (
     <motion.header
@@ -33,9 +35,7 @@ export function Navbar() {
               GitHub
             </Link>
           </Button>
-          <Button size="sm" className="rounded-full px-6" asChild>
-            <Link href="/dashboard">Get Started</Link>
-          </Button>
+          <AuthButton />
         </div>
       </div>
     </motion.header>
