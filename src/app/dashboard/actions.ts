@@ -19,7 +19,30 @@ export async function uploadPDF(formData: FormData) {
     // Step 1: Parse PDF
     let text: string;
     try {
-      const { PDFParse } = await import("pdf-parse/node");
+      // Polyfill DOMMatrix for serverless environments (Vercel)
+      if (typeof globalThis.DOMMatrix === "undefined") {
+        (globalThis as any).DOMMatrix = class DOMMatrix {
+          m11=1;m12=0;m13=0;m14=0;m21=0;m22=1;m23=0;m24=0;
+          m31=0;m32=0;m33=1;m34=0;m41=0;m42=0;m43=0;m44=1;
+          a=1;b=0;c=0;d=1;e=0;f=0;is2D=true;isIdentity=true;
+          constructor(...args: any[]) {}
+          transformPoint() { return {}; }
+          multiply() { return new (globalThis as any).DOMMatrix(); }
+          inverse() { return new (globalThis as any).DOMMatrix(); }
+          scale() { return new (globalThis as any).DOMMatrix(); }
+          translate() { return new (globalThis as any).DOMMatrix(); }
+          rotate() { return new (globalThis as any).DOMMatrix(); }
+        };
+      }
+      if (typeof globalThis.Path2D === "undefined") {
+        (globalThis as any).Path2D = class Path2D {
+          constructor(...args: any[]) {}
+          addPath() {} moveTo() {} lineTo() {} closePath() {}
+          rect() {} arc() {} bezierCurveTo() {} quadraticCurveTo() {}
+        };
+      }
+
+      const { PDFParse } = await import("pdf-parse");
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const parser = new PDFParse({ data: buffer });
