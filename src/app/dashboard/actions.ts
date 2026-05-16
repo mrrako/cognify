@@ -4,6 +4,8 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { generateSummary, generateFlashcards, generateQuiz, chunkText, generateEmbedding } from "./ai-actions";
 
+export const maxDuration = 60;
+
 export async function uploadPDF(formData: FormData) {
   try {
     const file = formData.get("file") as File;

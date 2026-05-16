@@ -32,7 +32,7 @@ ${text}`;
     return result.response.text();
   } catch (error: any) {
     console.error("AI Error:", error);
-    throw new Error("Failed to generate AI summary.");
+    throw new Error("Failed to generate AI summary: " + (error.message || "Unknown error"));
   }
 }
 
