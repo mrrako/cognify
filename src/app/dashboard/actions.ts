@@ -19,7 +19,7 @@ export async function uploadPDF(formData: FormData) {
     // Step 1: Parse PDF
     let text: string;
     try {
-      const { PDFParse } = await import("pdf-parse");
+      const { PDFParse } = await import("pdf-parse/node");
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const parser = new PDFParse({ data: buffer });
