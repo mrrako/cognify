@@ -16,39 +16,14 @@ export async function uploadPDF(formData: FormData) {
     if (authError) return { success: false, error: "Auth error: " + authError.message };
     if (!user) return { success: false, error: "You must be logged in to upload" };
 
-    // Step 1: Parse PDF
+    // Step 1: Parse PDF (using pdf-parse v1 - serverless compatible)
     let text: string;
     try {
-      // Polyfill DOMMatrix for serverless environments (Vercel)
-      if (typeof globalThis.DOMMatrix === "undefined") {
-        (globalThis as any).DOMMatrix = class DOMMatrix {
-          m11=1;m12=0;m13=0;m14=0;m21=0;m22=1;m23=0;m24=0;
-          m31=0;m32=0;m33=1;m34=0;m41=0;m42=0;m43=0;m44=1;
-          a=1;b=0;c=0;d=1;e=0;f=0;is2D=true;isIdentity=true;
-          constructor(...args: any[]) {}
-          transformPoint() { return {}; }
-          multiply() { return new (globalThis as any).DOMMatrix(); }
-          inverse() { return new (globalThis as any).DOMMatrix(); }
-          scale() { return new (globalThis as any).DOMMatrix(); }
-          translate() { return new (globalThis as any).DOMMatrix(); }
-          rotate() { return new (globalThis as any).DOMMatrix(); }
-        };
-      }
-      if (typeof globalThis.Path2D === "undefined") {
-        (globalThis as any).Path2D = class Path2D {
-          constructor(...args: any[]) {}
-          addPath() {} moveTo() {} lineTo() {} closePath() {}
-          rect() {} arc() {} bezierCurveTo() {} quadraticCurveTo() {}
-        };
-      }
-
-      const { PDFParse } = await import("pdf-parse");
+      const pdfParse = (await import("pdf-parse")).default;
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      const parser = new PDFParse({ data: buffer });
-      const pdfData = await parser.getText();
-      text = pdfData.text;
-      await parser.destroy();
+      const data = await pdfParse(buffer);
+      text = data.text;
     } catch (pdfError: any) {
       console.error("PDF Parse error:", pdfError);
       return { success: false, error: "PDF parsing failed: " + pdfError.message };
@@ -110,11 +85,9 @@ export async function uploadPDF(formData: FormData) {
 
       if (sectionError) {
         console.error("Section insert error:", sectionError);
-        // Don't fail the whole upload if embeddings fail
       }
     } catch (embError: any) {
       console.error("Embedding error:", embError);
-      // Don't fail the whole upload if embeddings fail
     }
 
     revalidatePath("/dashboard");
