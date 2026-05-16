@@ -19,7 +19,8 @@ export async function uploadPDF(formData: FormData) {
     // Step 1: Parse PDF (using pdf-parse v1 - serverless compatible)
     let text: string;
     try {
-      const pdfParse = (await import("pdf-parse")).default;
+      // @ts-ignore
+      const pdfParse = (await import("pdf-parse/lib/pdf-parse.js")).default;
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const data = await pdfParse(buffer);
