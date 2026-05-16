@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   description: "Transform lecture notes into summaries, flashcards, and quizzes in seconds.",
 };
 
+export const maxDuration = 60;
+
 export default function RootLayout({
   children,
 }: Readonly<{
