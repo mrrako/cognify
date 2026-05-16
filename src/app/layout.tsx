@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/auth-context";
+import { Toaster } from "@/components/ui/sonner";
+import { PageTransition } from "@/components/layout/page-transition";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,22 +16,14 @@ export const metadata: Metadata = {
   description: "Transform lecture notes into summaries, flashcards, and quizzes in seconds.",
 };
 
-import { AuthProvider } from "@/context/auth-context";
-
-import { Toaster } from "@/components/ui/sonner";
-
-import { PageTransition } from "@/components/layout/page-transition";
-
-import { ErrorBoundary } from "@/components/error-boundary";
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark scroll-smooth">
-      <body className={`${inter.variable} font-sans antialiased bg-background text-foreground`}>
+    <html lang="en" className="dark scroll-smooth" suppressHydrationWarning>
+      <body className={`${inter.variable} font-sans antialiased bg-background text-foreground`} suppressHydrationWarning>
         <ErrorBoundary>
           <AuthProvider>
             <PageTransition>
