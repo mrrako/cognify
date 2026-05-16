@@ -1,5 +1,6 @@
 "use client";
 
+import { use, useState, useEffect } from "react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SummaryView } from "@/components/study/summary-view";
@@ -8,41 +9,54 @@ import { QuizView } from "@/components/study/quiz-view";
 import { FileText, Brain, GraduationCap, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
 import { useAuth } from "@/context/auth-context";
 import { createClient } from "@/utils/supabase/client";
-import { useState, useEffect } from "react";
 import { ChatAssistant } from "@/components/study/chat-assistant";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
-export default function StudyPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function StudyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { user, loading: authLoading } = useAuth();
   const [note, setNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    if (user) {
+    if (!authLoading) {
+      if (!user) {
+        router.push("/login");
+        return;
+      }
       fetchNote();
     }
-  }, [user, id]);
+  }, [user, authLoading, id]);
 
   async function fetchNote() {
     try {
+      setLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from("notes")
         .select("*")
         .eq("id", id)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        setError(error.message);
+        toast.error("Failed to load: " + error.message);
+        return;
+      }
       setNote(data);
-    } catch (error: any) {
-      toast.error("Failed to load study material");
-      console.error(error);
+    } catch (err: any) {
+      console.error("Fetch error:", err);
+      setError(err.message);
+      toast.error("Error: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -64,10 +78,11 @@ export default function StudyPage({ params }: { params: { id: string } }) {
     );
   }
 
-  if (!note) return (
+  if (error || !note) return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">Note not found</h2>
+      <div className="text-center space-y-4">
+        <h2 className="text-2xl font-bold">Could not load note</h2>
+        {error && <p className="text-muted-foreground text-sm max-w-md">{error}</p>}
         <Button asChild><Link href="/dashboard">Return to Dashboard</Link></Button>
       </div>
     </div>
